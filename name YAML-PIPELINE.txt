@@ -1,0 +1,43 @@
+name: YAML-PIPELINE
+
+trigger: none
+#none -manual pipeline execuation
+
+pool: ADO-POOL
+
+steps: 
+- task: TerraformInstaller@1
+ #displayName: string # Human-readable name for the task.
+  displayName: TERRAFORM INSTALL
+  inputs:
+    terraformVersion: 'latest'
+
+- task: TerraformTask@5
+  displayName: TERRAFORM INIT
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/'
+    backendServiceArm: 'ADO-SVC'
+    backendAzureRmOverrideSubscriptionID: 'c8910526-ee3e-46ca-9040-847d816078b1'
+    backendAzureRmResourceGroupName: 'RG-Demo'
+    backendAzureRmStorageAccountName: 'storageado'
+    backendAzureRmContainerName: 'adocontainer'
+    backendAzureRmKey: 'terraform.tfstate'
+
+- task: TerraformTask@5
+  displayName: TERRAFORM PLAN
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/'
+    environmentServiceNameAzureRM: 'ADO-SVC'
+
+- task: TerraformTask@5
+  displayName: TERRAFORM APPLY
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/'
+    commandOptions: '-auto-approve'
+    environmentServiceNameAzureRM: 'ADO-SVC'
